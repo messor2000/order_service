@@ -17,12 +17,12 @@ import java.util.Collections;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
+import lombok.AllArgsConstructor;
+ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class OrderServiceImpl implements OrderService {
 
   private final OrderMapper orderMapper;

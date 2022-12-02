@@ -16,8 +16,6 @@ public class OrderEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
   private Long id;
-//  @OneToOne(cascade = CascadeType.ALL)
-//  @JoinColumn(name = "order_number_id")
   private Long orderNumber;
   private String deliveryAddress;
   private Integer pilotesAmount;
