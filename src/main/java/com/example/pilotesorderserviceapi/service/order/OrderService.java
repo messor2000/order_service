@@ -6,10 +6,10 @@ import java.util.List;
 
 public interface OrderService {
   Order findOrderById(Long orderId);
-  Order createOrder(Order order, Client client);
+  Order createOrder(Integer pilotesAmount, Client client);
   List<Order> getOrdersByClientData(String clientData);
-  Order updateOrderDetails(Long orderNumber, Order order);
+  Order updateOrderDetails(Integer orderNumber, Order order);
   void deleteOrder(Long orderId);
   List<Order> getOrders();
-  Order findOrderByOrderNumber(Long orderNumber);
+  Order findOrderByOrderNumber(Integer orderNumber);
 }

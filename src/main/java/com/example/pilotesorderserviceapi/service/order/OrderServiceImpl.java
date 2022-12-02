@@ -38,19 +38,19 @@ public class OrderServiceImpl implements OrderService {
 
   @Override
   @Transactional
-  public Order createOrder(Order order, Client client) {
-    if (!checkPilotesAmount(order.getPilotesAmount())) {
-      throw new InputMismatchException("You can order only 5, 10, or 15 pilotes, not: " + order.getPilotesAmount());
+  public Order createOrder(Integer pilotesAmount, Client client) {
+    if (!checkPilotesAmount(pilotesAmount)) {
+      throw new InputMismatchException("You can order only 5, 10, or 15 pilotes, not: " + pilotesAmount);
     }
 
     OrderEntity orderEntity = new OrderEntity();
     orderEntity.setCreatedAt(Instant.now());
-    orderEntity.setPilotesAmount(order.getPilotesAmount());
+    orderEntity.setPilotesAmount(pilotesAmount);
     orderEntity.setDeliveryAddress(client.getDeliveryAddress());
-    orderEntity.setPrice(BigDecimal.valueOf(1.33 * order.getPilotesAmount()));
+    orderEntity.setPrice(BigDecimal.valueOf(1.33 * pilotesAmount));
     orderEntity.setClientEmail(client.getEmail());
     OrderNumberEntity orderNumber = orderNumberRepository.getFirst().orElse(new OrderNumberEntity());
-    orderEntity.setOrderNumber(orderNumber.getOrderNumber());
+    orderEntity.setOrderNumber(pilotesAmount);
 
     orderNumber.setOrderNumber(orderNumber.getOrderNumber() + 1);
     orderNumberRepository.save(orderNumber);
@@ -76,7 +76,7 @@ public class OrderServiceImpl implements OrderService {
 
   @Override
   @Transactional
-  public Order updateOrderDetails(Long orderNumber, Order order) {
+  public Order updateOrderDetails(Integer orderNumber, Order order) {
     Instant now = Instant.now().minusSeconds(300);
     if (order.getCreatedAt().isBefore(now)) {
       throw new UpdateErrorException("You cannot modify order after 5 minutes of it creation");
@@ -111,7 +111,7 @@ public class OrderServiceImpl implements OrderService {
 
   @Override
   @Transactional(readOnly = true)
-  public Order findOrderByOrderNumber(Long orderNumber) {
+  public Order findOrderByOrderNumber(Integer orderNumber) {
     return orderRepository.findByOrderNumber(orderNumber).map(orderMapper::convert)
         .orElseThrow(() -> orderNotFoundByOrderNumber(String.valueOf(orderNumber)));
   }

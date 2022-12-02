@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface OrderRepository extends JpaRepository<OrderEntity, Long> {
-  Optional<OrderEntity> findByOrderNumber(Long orderNumber);
+  Optional<OrderEntity> findByOrderNumber(Integer orderNumber);
   List<OrderEntity> findByClientEmailContaining(String clientEmail);
 }

@@ -42,7 +42,7 @@ public class OrderServiceTest {
   public void setup(){
     client = new Client(1L, "name", "lastname", "test@gmail.com", "12345",
         "testAddress");
-    order = new Order(1L, 1L, 5, Instant.now());
+    order = new Order(1L, 1, 5, Instant.now());
   }
 
   @DisplayName("test for getOrderById method")
@@ -66,7 +66,7 @@ public class OrderServiceTest {
 
     given(orderRepository.save(orderEntity)).willReturn(orderEntity);
 
-    Order savedOrder = orderService.createOrder(order, client);
+    Order savedOrder = orderService.createOrder(5, client);
 
     assertThat(savedOrder).isNotNull();
   }
@@ -74,11 +74,11 @@ public class OrderServiceTest {
   @DisplayName("test for createOrder method which throw validation error")
   @Test
   public void givenOrderObject_whenSaveOrder_thenThrowsException(){
-    order = new Order(1L, 1L, 7, Instant.now());
+    order = new Order(1L, 1, 7, Instant.now());
     OrderEntity orderEntity = new OrderEntity();
     BeanUtils.copyProperties(order, orderEntity);
 
-    assertThrows(InputMismatchException.class, () -> orderService.createOrder(order, client));
+    assertThrows(InputMismatchException.class, () -> orderService.createOrder(6, client));
 
     verify(orderRepository, never()).save(any(OrderEntity.class));
   }
@@ -113,7 +113,7 @@ public class OrderServiceTest {
 
     given(orderRepository.save(orderEntity)).willReturn(orderEntity);
     order.setPilotesAmount(10);
-    Order updatedOrder = orderService.updateOrderDetails(1L, order);
+    Order updatedOrder = orderService.updateOrderDetails(1, order);
 
     assertThat(updatedOrder.getOrderNumber()).isEqualTo(10);
   }
@@ -121,11 +121,11 @@ public class OrderServiceTest {
   @DisplayName("test for updateOrderDetails method after 5 min throws an exception")
   @Test
   public void givenOrderNumberAndOrderObject_whenUpdateOrder_thenThrowsException(){
-    order = new Order(1L, 1L, 7, Instant.now().minusSeconds(500));
+    order = new Order(1L, 1, 7, Instant.now().minusSeconds(500));
     OrderEntity orderEntity = new OrderEntity();
     BeanUtils.copyProperties(order, orderEntity);
 
-    assertThrows(UpdateErrorException.class, () -> orderService.updateOrderDetails(1L, order));
+    assertThrows(UpdateErrorException.class, () -> orderService.updateOrderDetails(1, order));
 
     verify(orderRepository, never()).save(any(OrderEntity.class));
   }
@@ -145,7 +145,7 @@ public class OrderServiceTest {
   @DisplayName("test for getOrders method")
   @Test
   public void givenOrderList_whenGetOrders_thenReturnOrdersList(){
-    Order order1 = new Order(1L, 1L, 5,Instant.now());
+    Order order1 = new Order(1L, 1, 5,Instant.now());
 
     OrderEntity orderEntity = new OrderEntity();
     BeanUtils.copyProperties(order, orderEntity);
@@ -166,7 +166,7 @@ public class OrderServiceTest {
     OrderEntity orderEntity = new OrderEntity();
     BeanUtils.copyProperties(order, orderEntity);
 
-    given(orderRepository.findByOrderNumber(1L)).willReturn(Optional.of(orderEntity));
+    given(orderRepository.findByOrderNumber(1)).willReturn(Optional.of(orderEntity));
 
     Order finedOrder = orderService.findOrderByOrderNumber(order.getOrderNumber());
 

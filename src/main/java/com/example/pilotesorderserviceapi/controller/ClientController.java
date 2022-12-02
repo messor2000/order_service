@@ -5,7 +5,6 @@ import com.example.pilotesorderserviceapi.service.client.ClientService;
 import io.swagger.annotations.ApiOperation;
 import javax.validation.Valid;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.MediaType;
@@ -23,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ClientController {
   ClientService clientService;
 
-  @ApiOperation(value = "Get Board by ID")
+  @ApiOperation(value = "Get Client by ID")
   @GetMapping(path = "/client/{id}",
       produces = {MediaType.APPLICATION_JSON_VALUE })
   public ResponseEntity<Client> getClient(@PathVariable Long id) {

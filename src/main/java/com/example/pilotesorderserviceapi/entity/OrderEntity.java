@@ -16,7 +16,7 @@ public class OrderEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
   private Long id;
-  private Long orderNumber;
+  private Integer orderNumber;
   private String deliveryAddress;
   private Integer pilotesAmount;
   private BigDecimal price;

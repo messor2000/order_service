@@ -9,14 +9,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Order {
   private Long id;
-  private Long orderNumber;
+  private Integer orderNumber;
   private String deliveryAddress;
   private Integer pilotesAmount;
   private BigDecimal price;
   private String clientEmail;
   private Instant createdAt;
 
-  public Order(Long id, Long orderNumber, Integer pilotesAmount, Instant createdAt) {
+  public Order(Long id, Integer orderNumber, Integer pilotesAmount, Instant createdAt) {
     this.id = id;
     this.orderNumber = orderNumber;
     this.pilotesAmount = pilotesAmount;
