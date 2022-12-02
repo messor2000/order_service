@@ -12,8 +12,10 @@ import static org.mockito.Mockito.verify;
 import com.example.pilotesorderserviceapi.dto.Client;
 import com.example.pilotesorderserviceapi.dto.Order;
 import com.example.pilotesorderserviceapi.entity.OrderEntity;
+import com.example.pilotesorderserviceapi.exception.UpdateErrorException;
 import com.example.pilotesorderserviceapi.repo.OrderRepository;
 import com.example.pilotesorderserviceapi.service.order.OrderServiceImpl;
+import java.time.Instant;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Optional;
@@ -35,14 +37,12 @@ public class OrderServiceTest {
 
   private Client client;
   private Order order;
-  private String clientEmail;
 
   @BeforeEach
   public void setup(){
-    clientEmail = "test@gmail.com";
-    client = new Client(1L, "name", "lastname", clientEmail, "12345",
+    client = new Client(1L, "name", "lastname", "test@gmail.com", "12345",
         "testAddress");
-    order = new Order(1L, 5);
+    order = new Order(1L, 1L, 5, Instant.now());
   }
 
   @DisplayName("test for getOrderById method")
@@ -74,11 +74,58 @@ public class OrderServiceTest {
   @DisplayName("test for createOrder method which throw validation error")
   @Test
   public void givenOrderObject_whenSaveOrder_thenThrowsException(){
-    order = new Order(1L, 7);
+    order = new Order(1L, 1L, 7, Instant.now());
     OrderEntity orderEntity = new OrderEntity();
     BeanUtils.copyProperties(order, orderEntity);
 
     assertThrows(InputMismatchException.class, () -> orderService.createOrder(order, client));
+
+    verify(orderRepository, never()).save(any(OrderEntity.class));
+  }
+
+  @DisplayName("test for getOrderByClientData method")
+  @Test
+  public void givenClientEmail_whenGetOrderByClientData_thenReturnListOrderObject(){
+    OrderEntity orderEntity = new OrderEntity();
+    BeanUtils.copyProperties(order, orderEntity);
+    given(orderRepository.findByClientEmailContaining(client.getEmail())).willReturn(List.of(orderEntity));
+
+    List<Order> orderList = orderService.getOrdersByClientData(client.getEmail());
+
+    assertThat(orderList).isNotNull();
+    assertThat(orderList.size()).isEqualTo(1);
+  }
+
+  @DisplayName("test for getOrderByClientData method with invalid input")
+  @Test
+  public void givenClientEmail_whenGetOrderByClientData_thenThrowsException(){
+    String invalidData = "invalid data";
+    assertThrows(InputMismatchException.class, () -> orderService.getOrdersByClientData(invalidData));
+
+    verify(orderRepository, never()).findByClientEmailContaining(invalidData);
+  }
+
+  @DisplayName("test for updateOrderDetails method")
+  @Test
+  public void givenOrderNumberAndOrderObject_whenUpdateOrder_thenReturnUpdatedOrder(){
+    OrderEntity orderEntity = new OrderEntity();
+    BeanUtils.copyProperties(order, orderEntity);
+
+    given(orderRepository.save(orderEntity)).willReturn(orderEntity);
+    order.setPilotesAmount(10);
+    Order updatedOrder = orderService.updateOrderDetails(1L, order);
+
+    assertThat(updatedOrder.getOrderNumber()).isEqualTo(10);
+  }
+
+  @DisplayName("test for updateOrderDetails method after 5 min throws an exception")
+  @Test
+  public void givenOrderNumberAndOrderObject_whenUpdateOrder_thenThrowsException(){
+    order = new Order(1L, 1L, 7, Instant.now().minusSeconds(500));
+    OrderEntity orderEntity = new OrderEntity();
+    BeanUtils.copyProperties(order, orderEntity);
+
+    assertThrows(UpdateErrorException.class, () -> orderService.updateOrderDetails(1L, order));
 
     verify(orderRepository, never()).save(any(OrderEntity.class));
   }
@@ -93,5 +140,36 @@ public class OrderServiceTest {
     orderService.deleteOrder(orderId);
 
     verify(orderRepository, times(1)).deleteById(orderId);
+  }
+
+  @DisplayName("test for getOrders method")
+  @Test
+  public void givenOrderList_whenGetOrders_thenReturnOrdersList(){
+    Order order1 = new Order(1L, 1L, 5,Instant.now());
+
+    OrderEntity orderEntity = new OrderEntity();
+    BeanUtils.copyProperties(order, orderEntity);
+    OrderEntity orderEntity1 = new OrderEntity();
+    BeanUtils.copyProperties(order1, orderEntity1);
+
+    given(orderRepository.findAll()).willReturn(List.of(orderEntity, orderEntity1));
+
+    List<Order> orderList = orderService.getOrders();
+
+    assertThat(orderList).isNotNull();
+    assertThat(orderList.size()).isEqualTo(2);
+  }
+
+  @DisplayName("test for getOrderByOrderNumber method")
+  @Test
+  public void givenOrderNumber_whenGetOrderByNumber_thenReturnOrderObject(){
+    OrderEntity orderEntity = new OrderEntity();
+    BeanUtils.copyProperties(order, orderEntity);
+
+    given(orderRepository.findByOrderNumber(1L)).willReturn(Optional.of(orderEntity));
+
+    Order finedOrder = orderService.findOrderByOrderNumber(order.getOrderNumber());
+
+    assertThat(finedOrder).isNotNull();
   }
 }

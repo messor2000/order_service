@@ -16,8 +16,10 @@ public class Order {
   private String clientEmail;
   private Instant createdAt;
 
-  public Order(Long id, Integer pilotesAmount) {
+  public Order(Long id, Long orderNumber, Integer pilotesAmount, Instant createdAt) {
     this.id = id;
+    this.orderNumber = orderNumber;
     this.pilotesAmount = pilotesAmount;
+    this.createdAt = createdAt;
   }
 }
