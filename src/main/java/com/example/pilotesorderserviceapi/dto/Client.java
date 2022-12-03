@@ -1,15 +1,15 @@
 package com.example.pilotesorderserviceapi.dto;
 
 import java.time.Instant;
+import java.util.UUID;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 @Data
-@ToString
 @NoArgsConstructor
 public class Client {
-  private Long id;
+  private UUID id;
   private String firstName;
   private String lastName;
   private String email;
@@ -17,7 +17,7 @@ public class Client {
   private String deliveryAddress;
   private Instant createdAt;
 
-  public Client(Long id, String firstName, String lastName, String email, String phoneNumber, String deliveryAddress) {
+  public Client(UUID id, String firstName, String lastName, String email, String phoneNumber, String deliveryAddress) {
     this.id = id;
     this.firstName = firstName;
     this.lastName = lastName;

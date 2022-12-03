@@ -3,13 +3,14 @@ package com.example.pilotesorderserviceapi.service.order;
 import com.example.pilotesorderserviceapi.dto.Client;
 import com.example.pilotesorderserviceapi.dto.Order;
 import java.util.List;
+import java.util.UUID;
 
 public interface OrderService {
-  Order findOrderById(Long orderId);
+  Order getOrderById(UUID orderId);
   Order createOrder(Integer pilotesAmount, Client client);
   List<Order> getOrdersByClientData(String clientData);
   Order updateOrderDetails(Integer orderNumber, Order order);
-  void deleteOrder(Long orderId);
+  void deleteOrder(UUID orderId);
   List<Order> getOrders();
-  Order findOrderByOrderNumber(Integer orderNumber);
+  Order getOrderByOrderNumber(Integer orderNumber);
 }

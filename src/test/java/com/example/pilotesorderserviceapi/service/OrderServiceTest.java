@@ -19,6 +19,7 @@ import java.time.Instant;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,9 +41,9 @@ public class OrderServiceTest {
 
   @BeforeEach
   public void setup(){
-    client = new Client(1L, "name", "lastname", "test@gmail.com", "12345",
+    client = new Client(UUID.randomUUID(), "name", "lastname", "test@gmail.com", "12345",
         "testAddress");
-    order = new Order(1L, 1, 5, Instant.now());
+    order = new Order(UUID.randomUUID(), 1, 5, Instant.now());
   }
 
   @DisplayName("test for getOrderById method")
@@ -51,9 +52,9 @@ public class OrderServiceTest {
     OrderEntity orderEntity = new OrderEntity();
     BeanUtils.copyProperties(order, orderEntity);
 
-    given(orderRepository.findById(1L)).willReturn(Optional.of(orderEntity));
+    given(orderRepository.findById(order.getId())).willReturn(Optional.of(orderEntity));
 
-    Order finedOrder = orderService.findOrderById(order.getId());
+    Order finedOrder = orderService.getOrderById(order.getId());
 
     assertThat(finedOrder).isNotNull();
   }
@@ -74,7 +75,7 @@ public class OrderServiceTest {
   @DisplayName("test for createOrder method which throw validation error")
   @Test
   public void givenOrderObject_whenSaveOrder_thenThrowsException(){
-    order = new Order(1L, 1, 7, Instant.now());
+    order = new Order(UUID.randomUUID(), 1, 7, Instant.now());
     OrderEntity orderEntity = new OrderEntity();
     BeanUtils.copyProperties(order, orderEntity);
 
@@ -121,7 +122,7 @@ public class OrderServiceTest {
   @DisplayName("test for updateOrderDetails method after 5 min throws an exception")
   @Test
   public void givenOrderNumberAndOrderObject_whenUpdateOrder_thenThrowsException(){
-    order = new Order(1L, 1, 7, Instant.now().minusSeconds(500));
+    order = new Order(order.getId(), 1, 7, Instant.now().minusSeconds(500));
     OrderEntity orderEntity = new OrderEntity();
     BeanUtils.copyProperties(order, orderEntity);
 
@@ -133,19 +134,17 @@ public class OrderServiceTest {
   @DisplayName("test for deleteOrder method")
   @Test
   public void givenOrderId_whenDeleteOrder_thenNothing(){
-    long orderId = 1L;
+    willDoNothing().given(orderRepository).deleteById(order.getId());
 
-    willDoNothing().given(orderRepository).deleteById(orderId);
+    orderService.deleteOrder(order.getId());
 
-    orderService.deleteOrder(orderId);
-
-    verify(orderRepository, times(1)).deleteById(orderId);
+    verify(orderRepository, times(1)).deleteById(order.getId());
   }
 
   @DisplayName("test for getOrders method")
   @Test
   public void givenOrderList_whenGetOrders_thenReturnOrdersList(){
-    Order order1 = new Order(1L, 1, 5,Instant.now());
+    Order order1 = new Order(UUID.randomUUID(), 1, 5,Instant.now());
 
     OrderEntity orderEntity = new OrderEntity();
     BeanUtils.copyProperties(order, orderEntity);
@@ -168,7 +167,7 @@ public class OrderServiceTest {
 
     given(orderRepository.findByOrderNumber(1)).willReturn(Optional.of(orderEntity));
 
-    Order finedOrder = orderService.findOrderByOrderNumber(order.getOrderNumber());
+    Order finedOrder = orderService.getOrderByOrderNumber(order.getOrderNumber());
 
     assertThat(finedOrder).isNotNull();
   }

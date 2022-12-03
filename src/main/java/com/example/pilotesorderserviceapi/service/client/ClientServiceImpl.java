@@ -10,9 +10,8 @@ import com.example.pilotesorderserviceapi.util.ClientMapper;
 import java.time.Instant;
 import java.util.InputMismatchException;
 import java.util.Optional;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,14 +39,14 @@ public class ClientServiceImpl implements ClientService {
 
   @Override
   @Transactional(readOnly = true)
-  public Client getClientById(Long clientId) {
+  public Client getClientById(UUID clientId) {
     return clientRepository.findById(clientId).map(clientMapper::convert).orElseThrow(() ->
         clientNotFoundById(clientId));
   }
 
   @Override
   @Transactional
-  public void deleteClient(Long clientId) {
+  public void deleteClient(UUID clientId) {
     clientRepository.deleteById(clientId);
   }
 

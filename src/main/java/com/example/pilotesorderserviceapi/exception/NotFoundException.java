@@ -1,11 +1,13 @@
 package com.example.pilotesorderserviceapi.exception;
 
+import java.util.UUID;
+
 public class NotFoundException extends RuntimeException {
   public NotFoundException(String message) {
     super(message);
   }
 
-  public static NotFoundException clientNotFoundById(Long clientId) {
+  public static NotFoundException clientNotFoundById(UUID clientId) {
     return new NotFoundException("User not found by id: " + clientId);
   }
 
@@ -13,7 +15,7 @@ public class NotFoundException extends RuntimeException {
     return new NotFoundException("Order not found by order number: " + orderNumber);
   }
 
-  public static NotFoundException orderNotFoundByOrderId(Long orderId) {
+  public static NotFoundException orderNotFoundByOrderId(UUID orderId) {
     return new NotFoundException("Order not found by order id: " + orderId);
   }
 }

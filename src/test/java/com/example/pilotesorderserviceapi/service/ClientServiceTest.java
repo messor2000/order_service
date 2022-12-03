@@ -16,6 +16,7 @@ import com.example.pilotesorderserviceapi.repo.ClientRepository;
 import com.example.pilotesorderserviceapi.service.client.ClientServiceImpl;
 import java.util.InputMismatchException;
 import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,7 +36,7 @@ public class ClientServiceTest {
 
   @BeforeEach
   public void setup(){
-    client = new Client(1L, "name", "lastname", "test@gmail.com", "12345",
+    client = new Client(UUID.randomUUID(), "name", "lastname", "test@gmail.com", "12345",
         "testAddress");
   }
 
@@ -58,7 +59,7 @@ public class ClientServiceTest {
   @DisplayName("test for createClient method which throw validation error")
   @Test
   public void givenClientObject_whenSaveClient_thenThrowsException(){
-    client = new Client(1L, "name", "lastname", "incorrect email", "12345",
+    client = new Client(UUID.randomUUID(), "name", "lastname", "incorrect email", "12345",
         "testAddress");
     ClientEntity clientEntity = new ClientEntity();
     BeanUtils.copyProperties(client, clientEntity);
@@ -91,7 +92,7 @@ public class ClientServiceTest {
     ClientEntity clientEntity = new ClientEntity();
     BeanUtils.copyProperties(client, clientEntity);
 
-    given(clientRepository.findById(1L)).willReturn(Optional.of(clientEntity));
+    given(clientRepository.findById(client.getId())).willReturn(Optional.of(clientEntity));
 
     Client foundClient = clientService.getClientById(client.getId());
 
@@ -101,12 +102,10 @@ public class ClientServiceTest {
   @DisplayName("test for deleteClient method")
   @Test
   public void givenClientId_whenDeleteClient_thenNothing(){
-    long clientId = 1L;
+    willDoNothing().given(clientRepository).deleteById(client.getId());
 
-    willDoNothing().given(clientRepository).deleteById(clientId);
+    clientService.deleteClient(client.getId());
 
-    clientService.deleteClient(clientId);
-
-    verify(clientRepository, times(1)).deleteById(clientId);
+    verify(clientRepository, times(1)).deleteById(client.getId());
   }
 }

@@ -4,7 +4,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.pilotesorderserviceapi.PilotesOrderServiceApiApplication;
@@ -16,10 +19,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -42,7 +43,7 @@ public class ClientControllerTest {
 
   @BeforeEach
   void setUp() {
-    client = new Client(1L, "name", "lastname", "test@gmail.com", "12345",
+    client = new Client(UUID.randomUUID(), "name", "lastname", "test@gmail.com", "12345",
         "testAddress");
   }
 
@@ -55,6 +56,22 @@ public class ClientControllerTest {
             .content(asJsonString(client)))
         .andExpect(status().isOk());
     verify(clientService, times(1)).createClient(any(Client.class));
+  }
+
+  @Test
+  @DisplayName("test get method getClient")
+  public void givenClientId_whenGetClient_thenReturnStatusOK() throws Exception {
+    when(clientService.getClientById(client.getId())).thenReturn(client);
+    mockMvc.perform(get("/client/{id}", client.getId()))
+        .andExpect(status().isOk())
+        .andExpect(content().json(asJsonString(client)));
+  }
+
+  @Test
+  @DisplayName("test delete method deleteClient")
+  public void givenClientId_whenDeleteClient_thenReturnStatusOK() throws Exception {
+    mockMvc.perform(delete("/client/{id}", client.getId()))
+        .andExpect(status().isOk());
   }
 
   private String asJsonString(final Object obj) {

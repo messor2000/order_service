@@ -16,9 +16,10 @@ import java.time.Instant;
 import java.util.Collections;
 import java.util.InputMismatchException;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
- import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -27,11 +28,12 @@ public class OrderServiceImpl implements OrderService {
 
   private final OrderMapper orderMapper;
   private final OrderRepository orderRepository;
+
   private final OrderNumberRepository orderNumberRepository;
 
   @Override
   @Transactional(readOnly = true)
-  public Order findOrderById(Long orderId) {
+  public Order getOrderById(UUID orderId) {
     return orderRepository.findById(orderId).map(orderMapper::convert).orElseThrow(() ->
         orderNotFoundByOrderId(orderId));
   }
@@ -49,7 +51,7 @@ public class OrderServiceImpl implements OrderService {
     orderEntity.setDeliveryAddress(client.getDeliveryAddress());
     orderEntity.setPrice(BigDecimal.valueOf(1.33 * pilotesAmount));
     orderEntity.setClientEmail(client.getEmail());
-    OrderNumberEntity orderNumber = orderNumberRepository.getFirst().orElse(new OrderNumberEntity());
+    OrderNumberEntity orderNumber = orderNumberRepository.findAll().stream().findAny().orElse(new OrderNumberEntity());
     orderEntity.setOrderNumber(pilotesAmount);
 
     orderNumber.setOrderNumber(orderNumber.getOrderNumber() + 1);
@@ -82,7 +84,7 @@ public class OrderServiceImpl implements OrderService {
       throw new UpdateErrorException("You cannot modify order after 5 minutes of it creation");
     }
 
-    OrderEntity foundOrder = orderMapper.convert(findOrderByOrderNumber(orderNumber));
+    OrderEntity foundOrder = orderMapper.convert(getOrderByOrderNumber(orderNumber));
     foundOrder.setDeliveryAddress(order.getDeliveryAddress());
     foundOrder.setCreatedAt(Instant.now());
     if (!foundOrder.getPilotesAmount().equals(order.getPilotesAmount())) {
@@ -98,7 +100,7 @@ public class OrderServiceImpl implements OrderService {
 
   @Override
   @Transactional
-  public void deleteOrder(Long orderId) {
+  public void deleteOrder(UUID orderId) {
     orderRepository.deleteById(orderId);
   }
 
@@ -111,7 +113,7 @@ public class OrderServiceImpl implements OrderService {
 
   @Override
   @Transactional(readOnly = true)
-  public Order findOrderByOrderNumber(Integer orderNumber) {
+  public Order getOrderByOrderNumber(Integer orderNumber) {
     return orderRepository.findByOrderNumber(orderNumber).map(orderMapper::convert)
         .orElseThrow(() -> orderNotFoundByOrderNumber(String.valueOf(orderNumber)));
   }
