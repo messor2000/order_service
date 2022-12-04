@@ -50,7 +50,12 @@ public class OrderControllerTest {
   @BeforeEach
   void setUp() {
     String clientEmail = "test@gmail.com";
-    order = new Order(UUID.randomUUID(), 1, 5, Instant.now(), clientEmail);
+    order = Order.builder()
+        .id(UUID.randomUUID())
+        .orderNumber(1)
+        .pilotesAmount(5)
+        .clientEmail(clientEmail)
+        .build();
     client = new Client(UUID.randomUUID(), "name", "lastname", "test@gmail.com", "12345",
         "testAddress");
   }

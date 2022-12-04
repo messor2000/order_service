@@ -43,7 +43,11 @@ public class OrderServiceTest {
   public void setup(){
     client = new Client(UUID.randomUUID(), "name", "lastname", "test@gmail.com", "12345",
         "testAddress");
-    order = new Order(UUID.randomUUID(), 1, 5, Instant.now());
+    order = Order.builder()
+        .id(UUID.randomUUID())
+        .orderNumber(1)
+        .pilotesAmount(5)
+        .build();
   }
 
   @DisplayName("test for getOrderById method")
@@ -75,7 +79,11 @@ public class OrderServiceTest {
   @DisplayName("test for createOrder method which throw validation error")
   @Test
   public void givenOrderObject_whenSaveOrder_thenThrowsException(){
-    order = new Order(UUID.randomUUID(), 1, 7, Instant.now());
+    order = Order.builder()
+        .id(UUID.randomUUID())
+        .orderNumber(1)
+        .pilotesAmount(7)
+        .build();
     OrderEntity orderEntity = new OrderEntity();
     BeanUtils.copyProperties(order, orderEntity);
 
@@ -122,7 +130,12 @@ public class OrderServiceTest {
   @DisplayName("test for updateOrderDetails method after 5 min throws an exception")
   @Test
   public void givenOrderNumberAndOrderObject_whenUpdateOrder_thenThrowsException(){
-    order = new Order(order.getId(), 1, 7, Instant.now().minusSeconds(500));
+    order = Order.builder()
+        .id(UUID.randomUUID())
+        .orderNumber(1)
+        .pilotesAmount(5)
+        .createdAt(Instant.now().minusSeconds(500))
+        .build();
     OrderEntity orderEntity = new OrderEntity();
     BeanUtils.copyProperties(order, orderEntity);
 
@@ -144,7 +157,12 @@ public class OrderServiceTest {
   @DisplayName("test for getOrders method")
   @Test
   public void givenOrderList_whenGetOrders_thenReturnOrdersList(){
-    Order order1 = new Order(UUID.randomUUID(), 1, 5,Instant.now());
+    Order order1 = Order.builder()
+        .id(UUID.randomUUID())
+        .orderNumber(1)
+        .pilotesAmount(5)
+        .createdAt(Instant.now())
+        .build();
 
     OrderEntity orderEntity = new OrderEntity();
     BeanUtils.copyProperties(order, orderEntity);

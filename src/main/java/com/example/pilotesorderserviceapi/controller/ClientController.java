@@ -2,6 +2,7 @@ package com.example.pilotesorderserviceapi.controller;
 
 import com.example.pilotesorderserviceapi.dto.Client;
 import com.example.pilotesorderserviceapi.service.client.ClientService;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import java.util.UUID;
 import lombok.AccessLevel;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @AllArgsConstructor
+@Api(value = "Client Rest Controller")
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class ClientController {
   ClientService clientService;
