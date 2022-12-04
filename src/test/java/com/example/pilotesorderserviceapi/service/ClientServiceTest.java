@@ -19,7 +19,6 @@ import com.example.pilotesorderserviceapi.util.TimeFormatter;
 import java.time.Instant;
 import java.util.InputMismatchException;
 import java.util.Optional;
-import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -43,8 +42,14 @@ public class ClientServiceTest {
 
   @BeforeEach
   public void setup(){
-    client = new Client("name", "lastname", "test@gmail.com",
-        "(202) 555-0125", "testAddress", timeFormatter.formatTime(Instant.now()));
+    client = Client.builder()
+        .firstName("name")
+        .lastName("lastName")
+        .email("test@gmail.com")
+        .phoneNumber("(202) 555-0125")
+        .deliveryAddress("testAddress")
+        .createdAt(timeFormatter.formatTime(Instant.now()))
+        .build();
   }
 
   @DisplayName("test for createClient method")
@@ -65,8 +70,14 @@ public class ClientServiceTest {
   @DisplayName("test for createClient method which throw validation error")
   @Test
   public void givenClientObject_whenSaveClient_thenThrowsException(){
-    client = new Client("name", "lastname", "incorrect email", "12345",
-        "testAddress", timeFormatter.formatTime(Instant.now()));
+    client = Client.builder()
+        .firstName("name")
+        .lastName("lastName")
+        .email("test@gmail.com")
+        .phoneNumber("(202) 555-0125")
+        .deliveryAddress("testAddress")
+        .createdAt(timeFormatter.formatTime(Instant.now()))
+        .build();
 
     given(clientRepository.findByEmail(client.getEmail()))
         .willReturn(Optional.empty());

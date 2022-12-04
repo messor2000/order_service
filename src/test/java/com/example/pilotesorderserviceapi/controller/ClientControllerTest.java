@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.example.pilotesorderserviceapi.PilotesOrderServiceApiApplication;
 import com.example.pilotesorderserviceapi.dto.Client;
+import com.example.pilotesorderserviceapi.exception.ObjectToJsonStringException;
 import com.example.pilotesorderserviceapi.service.client.ClientServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
@@ -44,8 +45,14 @@ public class ClientControllerTest {
 
   @BeforeEach
   void setUp() {
-    client = new Client(UUID.randomUUID(), "name", "lastname", "test@gmail.com", "12345",
-        "testAddress");
+    client = Client.builder()
+        .id(UUID.randomUUID())
+        .firstName("name")
+        .lastName("lastName")
+        .email("test@gmail.com")
+        .phoneNumber("(202) 555-0125")
+        .deliveryAddress("testAddress")
+        .build();
   }
 
   @Test
@@ -79,7 +86,7 @@ public class ClientControllerTest {
     try {
       return objectMapper.writeValueAsString(obj);
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new ObjectToJsonStringException(e.getMessage());
     }
   }
 }

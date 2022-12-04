@@ -15,9 +15,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.example.pilotesorderserviceapi.PilotesOrderServiceApiApplication;
 import com.example.pilotesorderserviceapi.dto.Client;
 import com.example.pilotesorderserviceapi.dto.Order;
+import com.example.pilotesorderserviceapi.exception.ObjectToJsonStringException;
 import com.example.pilotesorderserviceapi.service.order.OrderServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,8 +56,14 @@ public class OrderControllerTest {
         .pilotesAmount(5)
         .clientEmail(clientEmail)
         .build();
-    client = new Client("name", "lastname", "test@gmail.com", "12345",
-        "testAddress");
+    client = Client.builder()
+        .id(UUID.randomUUID())
+        .firstName("name")
+        .lastName("lastName")
+        .email("test@gmail.com")
+        .phoneNumber("(202) 555-0125")
+        .deliveryAddress("testAddress")
+        .build();
   }
 
   @Test
@@ -72,9 +78,10 @@ public class OrderControllerTest {
   @Test
   @DisplayName("test post method createOrder")
   public void givenAnAmountOfOrderAndClientObject_whenCreateOrder_thenReturnStatusOK() throws Exception {
-    when(orderService.createOrder(5, any(Client.class))).thenAnswer(c -> new Order());
+    when(orderService.createOrder(eq(5), any(Client.class))).thenAnswer(c -> new Order());
     mockMvc.perform(post("/order")
             .contentType(MediaType.APPLICATION_JSON)
+            .param("pilotesAmount", "5")
             .content(asJsonString(order)))
         .andExpect(status().isOk());
     verify(orderService, times(1)).createOrder(eq(5), any(Client.class));
@@ -129,7 +136,7 @@ public class OrderControllerTest {
     try {
       return objectMapper.writeValueAsString(obj);
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new ObjectToJsonStringException(e.getMessage());
     }
   }
 }
