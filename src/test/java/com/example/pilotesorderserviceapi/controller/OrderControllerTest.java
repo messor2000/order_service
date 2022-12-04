@@ -56,7 +56,7 @@ public class OrderControllerTest {
         .pilotesAmount(5)
         .clientEmail(clientEmail)
         .build();
-    client = new Client(UUID.randomUUID(), "name", "lastname", "test@gmail.com", "12345",
+    client = new Client("name", "lastname", "test@gmail.com", "12345",
         "testAddress");
   }
 
@@ -72,7 +72,7 @@ public class OrderControllerTest {
   @Test
   @DisplayName("test post method createOrder")
   public void givenAnAmountOfOrderAndClientObject_whenCreateOrder_thenReturnStatusOK() throws Exception {
-    when(orderService.createOrder(eq(5), any(Client.class))).thenAnswer(c -> new Order());
+    when(orderService.createOrder(5, any(Client.class))).thenAnswer(c -> new Order());
     mockMvc.perform(post("/order")
             .contentType(MediaType.APPLICATION_JSON)
             .content(asJsonString(order)))

@@ -1,7 +1,6 @@
 package com.example.pilotesorderserviceapi.dto;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,5 +18,14 @@ public class Order {
   private Integer pilotesAmount;
   private BigDecimal price;
   private String clientEmail;
-  private Instant createdAt;
+  private String createdAt;
+
+  public Order(Integer orderNumber, String deliveryAddress, Integer pilotesAmount, BigDecimal price,
+               String clientEmail) {
+    this.orderNumber = orderNumber;
+    this.deliveryAddress = deliveryAddress;
+    this.pilotesAmount = pilotesAmount;
+    this.price = price;
+    this.clientEmail = clientEmail;
+  }
 }

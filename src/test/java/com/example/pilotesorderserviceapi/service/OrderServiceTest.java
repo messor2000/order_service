@@ -13,8 +13,12 @@ import com.example.pilotesorderserviceapi.dto.Client;
 import com.example.pilotesorderserviceapi.dto.Order;
 import com.example.pilotesorderserviceapi.entity.OrderEntity;
 import com.example.pilotesorderserviceapi.exception.UpdateErrorException;
+import com.example.pilotesorderserviceapi.repo.OrderNumberRepository;
 import com.example.pilotesorderserviceapi.repo.OrderRepository;
 import com.example.pilotesorderserviceapi.service.order.OrderServiceImpl;
+import com.example.pilotesorderserviceapi.util.OrderMapper;
+import com.example.pilotesorderserviceapi.util.TimeFormatter;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.InputMismatchException;
 import java.util.List;
@@ -26,35 +30,43 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.BeanUtils;
 
 @ExtendWith(MockitoExtension.class)
 public class OrderServiceTest {
   @Mock
   private OrderRepository orderRepository;
+  @Mock
+  private OrderNumberRepository orderNumberRepository;
   @InjectMocks
   private OrderServiceImpl orderService;
+  @Spy
+  private OrderMapper orderMapper;
+  @Spy
+  private TimeFormatter timeFormatter;
 
   private Client client;
   private Order order;
 
   @BeforeEach
   public void setup(){
-    client = new Client(UUID.randomUUID(), "name", "lastname", "test@gmail.com", "12345",
-        "testAddress");
+    client = new Client("name", "lastname", "test@gmail.com", "12345",
+        "testAddress", timeFormatter.formatTime(Instant.now()));
     order = Order.builder()
-        .id(UUID.randomUUID())
         .orderNumber(1)
+        .deliveryAddress(client.getDeliveryAddress())
         .pilotesAmount(5)
+        .createdAt(timeFormatter.formatTime(Instant.now()))
+        .price(new BigDecimal("6.65"))
+        .clientEmail(client.getEmail())
         .build();
   }
 
   @DisplayName("test for getOrderById method")
   @Test
   public void givenOrderId_whenGetOrderById_thenReturnOrderObject(){
-    OrderEntity orderEntity = new OrderEntity();
-    BeanUtils.copyProperties(order, orderEntity);
+    OrderEntity orderEntity = orderMapper.convert(order);
 
     given(orderRepository.findById(order.getId())).willReturn(Optional.of(orderEntity));
 
@@ -66,8 +78,7 @@ public class OrderServiceTest {
   @DisplayName("test for createOrder method")
   @Test
   public void givenOrderAndClientObjects_whenSaveOrder_thenReturnOrderObject(){
-    OrderEntity orderEntity = new OrderEntity();
-    BeanUtils.copyProperties(order, orderEntity);
+    OrderEntity orderEntity = orderMapper.convert(order);
 
     given(orderRepository.save(orderEntity)).willReturn(orderEntity);
 
@@ -84,8 +95,6 @@ public class OrderServiceTest {
         .orderNumber(1)
         .pilotesAmount(7)
         .build();
-    OrderEntity orderEntity = new OrderEntity();
-    BeanUtils.copyProperties(order, orderEntity);
 
     assertThrows(InputMismatchException.class, () -> orderService.createOrder(6, client));
 
@@ -95,8 +104,8 @@ public class OrderServiceTest {
   @DisplayName("test for getOrderByClientData method")
   @Test
   public void givenClientEmail_whenGetOrderByClientData_thenReturnListOrderObject(){
-    OrderEntity orderEntity = new OrderEntity();
-    BeanUtils.copyProperties(order, orderEntity);
+    OrderEntity orderEntity = orderMapper.convert(order);
+
     given(orderRepository.findByClientEmailContaining(client.getEmail())).willReturn(List.of(orderEntity));
 
     List<Order> orderList = orderService.getOrdersByClientData(client.getEmail());
@@ -117,11 +126,12 @@ public class OrderServiceTest {
   @DisplayName("test for updateOrderDetails method")
   @Test
   public void givenOrderNumberAndOrderObject_whenUpdateOrder_thenReturnUpdatedOrder(){
-    OrderEntity orderEntity = new OrderEntity();
-    BeanUtils.copyProperties(order, orderEntity);
+    orderRepository.save(orderMapper.convert(order));
+    OrderEntity orderEntity = orderMapper.convert(order);
 
     given(orderRepository.save(orderEntity)).willReturn(orderEntity);
     order.setPilotesAmount(10);
+    order.setCreatedAt(timeFormatter.formatTime(Instant.now()));
     Order updatedOrder = orderService.updateOrderDetails(1, order);
 
     assertThat(updatedOrder.getOrderNumber()).isEqualTo(10);
@@ -134,12 +144,10 @@ public class OrderServiceTest {
         .id(UUID.randomUUID())
         .orderNumber(1)
         .pilotesAmount(5)
-        .createdAt(Instant.now().minusSeconds(500))
+        .createdAt(timeFormatter.formatTime(Instant.now().minusSeconds(500)))
         .build();
-    OrderEntity orderEntity = new OrderEntity();
-    BeanUtils.copyProperties(order, orderEntity);
 
-    assertThrows(UpdateErrorException.class, () -> orderService.updateOrderDetails(1, order));
+    assertThrows(UpdateErrorException.class, () -> orderService.updateOrderDetails(order.getOrderNumber(), order));
 
     verify(orderRepository, never()).save(any(OrderEntity.class));
   }
@@ -161,13 +169,11 @@ public class OrderServiceTest {
         .id(UUID.randomUUID())
         .orderNumber(1)
         .pilotesAmount(5)
-        .createdAt(Instant.now())
+        .createdAt(timeFormatter.formatTime(Instant.now()))
         .build();
 
-    OrderEntity orderEntity = new OrderEntity();
-    BeanUtils.copyProperties(order, orderEntity);
-    OrderEntity orderEntity1 = new OrderEntity();
-    BeanUtils.copyProperties(order1, orderEntity1);
+    OrderEntity orderEntity = orderMapper.convert(order);
+    OrderEntity orderEntity1 = orderMapper.convert(order1);
 
     given(orderRepository.findAll()).willReturn(List.of(orderEntity, orderEntity1));
 
@@ -180,10 +186,9 @@ public class OrderServiceTest {
   @DisplayName("test for getOrderByOrderNumber method")
   @Test
   public void givenOrderNumber_whenGetOrderByNumber_thenReturnOrderObject(){
-    OrderEntity orderEntity = new OrderEntity();
-    BeanUtils.copyProperties(order, orderEntity);
+    OrderEntity orderEntity = orderMapper.convert(order);
 
-    given(orderRepository.findByOrderNumber(1)).willReturn(Optional.of(orderEntity));
+    given(orderRepository.findByOrderNumber(order.getOrderNumber())).willReturn(Optional.of(orderEntity));
 
     Order finedOrder = orderService.getOrderByOrderNumber(order.getOrderNumber());
 

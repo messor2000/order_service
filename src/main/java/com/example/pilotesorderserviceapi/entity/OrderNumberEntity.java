@@ -18,5 +18,9 @@ public class OrderNumberEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
   private Long id;
-  private Long orderNumber;
+  private Integer orderNumber;
+
+  public OrderNumberEntity(Integer orderNumber) {
+    this.orderNumber = orderNumber;
+  }
 }

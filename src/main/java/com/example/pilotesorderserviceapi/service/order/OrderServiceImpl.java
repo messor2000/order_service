@@ -2,23 +2,33 @@ package com.example.pilotesorderserviceapi.service.order;
 
 import static com.example.pilotesorderserviceapi.exception.NotFoundException.orderNotFoundByOrderId;
 import static com.example.pilotesorderserviceapi.exception.NotFoundException.orderNotFoundByOrderNumber;
+import static com.example.pilotesorderserviceapi.exception.NotFoundException.orderNumberNotFound;
 
 import com.example.pilotesorderserviceapi.dto.Client;
 import com.example.pilotesorderserviceapi.dto.Order;
 import com.example.pilotesorderserviceapi.entity.OrderEntity;
 import com.example.pilotesorderserviceapi.entity.OrderNumberEntity;
+import com.example.pilotesorderserviceapi.exception.NotFoundException;
 import com.example.pilotesorderserviceapi.exception.UpdateErrorException;
 import com.example.pilotesorderserviceapi.repo.OrderNumberRepository;
 import com.example.pilotesorderserviceapi.repo.OrderRepository;
 import com.example.pilotesorderserviceapi.util.OrderMapper;
+import com.example.pilotesorderserviceapi.util.TimeFormatter;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.Collections;
 import java.util.InputMismatchException;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,8 +38,9 @@ public class OrderServiceImpl implements OrderService {
 
   private final OrderMapper orderMapper;
   private final OrderRepository orderRepository;
-
   private final OrderNumberRepository orderNumberRepository;
+  private final TimeFormatter timeFormatter;
+
 
   @Override
   @Transactional(readOnly = true)
@@ -46,16 +57,14 @@ public class OrderServiceImpl implements OrderService {
     }
 
     OrderEntity orderEntity = new OrderEntity();
-    orderEntity.setCreatedAt(Instant.now());
+    orderEntity.setCreatedAt(timeFormatter.formatTime(Instant.now()));
     orderEntity.setPilotesAmount(pilotesAmount);
     orderEntity.setDeliveryAddress(client.getDeliveryAddress());
     orderEntity.setPrice(BigDecimal.valueOf(1.33 * pilotesAmount));
     orderEntity.setClientEmail(client.getEmail());
-    OrderNumberEntity orderNumber = orderNumberRepository.findAll().stream().findAny().orElse(new OrderNumberEntity());
-    orderEntity.setOrderNumber(pilotesAmount);
 
-    orderNumber.setOrderNumber(orderNumber.getOrderNumber() + 1);
-    orderNumberRepository.save(orderNumber);
+    orderEntity.setOrderNumber(getOrderNumber());
+
     return orderMapper.convert(orderRepository.save(orderEntity));
   }
 
@@ -67,7 +76,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     List<Order> orders = orderRepository.findByClientEmailContaining(clientData).stream()
-        .map(orderMapper::convert).toList();
+        .map(orderMapper::convert).collect(Collectors.toList());
 
     if (orders.isEmpty()) {
       return Collections.emptyList();
@@ -79,14 +88,13 @@ public class OrderServiceImpl implements OrderService {
   @Override
   @Transactional
   public Order updateOrderDetails(Integer orderNumber, Order order) {
-    Instant now = Instant.now().minusSeconds(300);
-    if (order.getCreatedAt().isBefore(now)) {
+    OrderEntity foundOrder = orderMapper.convert(getOrderByOrderNumber(orderNumber));
+    if (checkOrderTime(foundOrder)) {
       throw new UpdateErrorException("You cannot modify order after 5 minutes of it creation");
     }
 
-    OrderEntity foundOrder = orderMapper.convert(getOrderByOrderNumber(orderNumber));
     foundOrder.setDeliveryAddress(order.getDeliveryAddress());
-    foundOrder.setCreatedAt(Instant.now());
+    foundOrder.setCreatedAt(timeFormatter.formatTime(Instant.now()));
     if (!foundOrder.getPilotesAmount().equals(order.getPilotesAmount())) {
       if (checkPilotesAmount(order.getPilotesAmount())) {
         throw new InputMismatchException("You can order only 5, 10, or 15 pilotes, not: " + order.getPilotesAmount());
@@ -118,11 +126,36 @@ public class OrderServiceImpl implements OrderService {
         .orElseThrow(() -> orderNotFoundByOrderNumber(String.valueOf(orderNumber)));
   }
 
+  @Transactional
+  public Integer getOrderNumber() {
+    List<OrderNumberEntity> orderNumberEntities = orderNumberRepository.getOrderNumberEntities();
+    OrderNumberEntity foundOrderNumber = orderNumberEntities.stream().findFirst()
+        .orElse(new OrderNumberEntity(0));
+    incrementOrderNumber(foundOrderNumber);
+
+    return foundOrderNumber.getOrderNumber();
+  }
+
+  @Transactional
+  public void incrementOrderNumber(OrderNumberEntity orderNumberEntity) {
+    orderNumberEntity.setOrderNumber(orderNumberEntity.getOrderNumber() + 1);
+    orderNumberRepository.save(orderNumberEntity);
+  }
+
   private boolean checkPilotesAmount(Integer pilotesAmount) {
     return pilotesAmount.equals(5) || pilotesAmount.equals(10) || pilotesAmount.equals(15);
   }
 
   private boolean checkInputData(String clientEmail) {
     return clientEmail.toLowerCase().matches("[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,3}");
+  }
+
+  private boolean checkOrderTime(OrderEntity order) {
+    String orderTime = order.getCreatedAt();
+    int orderMinutes = Integer.parseInt(StringUtils.right(orderTime, 2));
+    String now = timeFormatter.formatTime(Instant.now());
+    int nowMinutes = Integer.parseInt(StringUtils.right(now, 2));
+
+    return nowMinutes <= orderMinutes;
   }
 }

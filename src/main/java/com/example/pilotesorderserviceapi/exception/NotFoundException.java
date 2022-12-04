@@ -18,4 +18,8 @@ public class NotFoundException extends RuntimeException {
   public static NotFoundException orderNotFoundByOrderId(UUID orderId) {
     return new NotFoundException("Order not found by order id: " + orderId);
   }
+
+  public static NotFoundException orderNumberNotFound() {
+    return new NotFoundException("Order number entity not found");
+  }
 }

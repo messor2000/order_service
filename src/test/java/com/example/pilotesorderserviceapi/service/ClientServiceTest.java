@@ -14,6 +14,9 @@ import com.example.pilotesorderserviceapi.entity.ClientEntity;
 import com.example.pilotesorderserviceapi.exception.ClientExistsException;
 import com.example.pilotesorderserviceapi.repo.ClientRepository;
 import com.example.pilotesorderserviceapi.service.client.ClientServiceImpl;
+import com.example.pilotesorderserviceapi.util.ClientMapper;
+import com.example.pilotesorderserviceapi.util.TimeFormatter;
+import java.time.Instant;
 import java.util.InputMismatchException;
 import java.util.Optional;
 import java.util.UUID;
@@ -23,8 +26,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.BeanUtils;
 
 @ExtendWith(MockitoExtension.class)
 public class ClientServiceTest {
@@ -32,12 +35,16 @@ public class ClientServiceTest {
   private ClientServiceImpl clientService;
   @Mock
   private ClientRepository clientRepository;
+  @Spy
+  private ClientMapper clientMapper;
+  @Spy
+  private TimeFormatter timeFormatter;
   private Client client;
 
   @BeforeEach
   public void setup(){
-    client = new Client(UUID.randomUUID(), "name", "lastname", "test@gmail.com", "12345",
-        "testAddress");
+    client = new Client("name", "lastname", "test@gmail.com",
+        "(202) 555-0125", "testAddress", timeFormatter.formatTime(Instant.now()));
   }
 
   @DisplayName("test for createClient method")
@@ -46,8 +53,7 @@ public class ClientServiceTest {
     given(clientRepository.findByEmail(client.getEmail()))
         .willReturn(Optional.empty());
 
-    ClientEntity clientEntity = new ClientEntity();
-    BeanUtils.copyProperties(client, clientEntity);
+    ClientEntity clientEntity = clientMapper.convert(client);
 
     given(clientRepository.save(clientEntity)).willReturn(clientEntity);
 
@@ -59,10 +65,8 @@ public class ClientServiceTest {
   @DisplayName("test for createClient method which throw validation error")
   @Test
   public void givenClientObject_whenSaveClient_thenThrowsException(){
-    client = new Client(UUID.randomUUID(), "name", "lastname", "incorrect email", "12345",
-        "testAddress");
-    ClientEntity clientEntity = new ClientEntity();
-    BeanUtils.copyProperties(client, clientEntity);
+    client = new Client("name", "lastname", "incorrect email", "12345",
+        "testAddress", timeFormatter.formatTime(Instant.now()));
 
     given(clientRepository.findByEmail(client.getEmail()))
         .willReturn(Optional.empty());
@@ -75,8 +79,7 @@ public class ClientServiceTest {
   @DisplayName("test for createClient method which throws exception")
   @Test
   public void givenExistingEmail_whenSaveClient_thenThrowsException(){
-    ClientEntity clientEntity = new ClientEntity();
-    BeanUtils.copyProperties(client, clientEntity);
+    ClientEntity clientEntity = clientMapper.convert(client);
 
     given(clientRepository.findByEmail(client.getEmail()))
         .willReturn(Optional.of(clientEntity));
@@ -89,8 +92,7 @@ public class ClientServiceTest {
   @DisplayName("test for getClientById method")
   @Test
   public void givenEmployeeId_whenGetEmployeeById_thenReturnEmployeeObject(){
-    ClientEntity clientEntity = new ClientEntity();
-    BeanUtils.copyProperties(client, clientEntity);
+    ClientEntity clientEntity = clientMapper.convert(client);
 
     given(clientRepository.findById(client.getId())).willReturn(Optional.of(clientEntity));
 

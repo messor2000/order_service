@@ -7,6 +7,7 @@ import com.example.pilotesorderserviceapi.entity.ClientEntity;
 import com.example.pilotesorderserviceapi.exception.ClientExistsException;
 import com.example.pilotesorderserviceapi.repo.ClientRepository;
 import com.example.pilotesorderserviceapi.util.ClientMapper;
+import com.example.pilotesorderserviceapi.util.TimeFormatter;
 import java.time.Instant;
 import java.util.InputMismatchException;
 import java.util.Optional;
@@ -21,6 +22,7 @@ public class ClientServiceImpl implements ClientService {
 
   private final ClientMapper clientMapper;
   private final ClientRepository clientRepository;
+  private final TimeFormatter timeFormatter;
 
   @Override
   @Transactional
@@ -31,8 +33,7 @@ public class ClientServiceImpl implements ClientService {
     if (!checkClientData(client.getEmail(), client.getPhoneNumber())) {
       throw new InputMismatchException("Error in email or phone number input");
     }
-
-    client.setCreatedAt(Instant.now());
+    client.setCreatedAt(timeFormatter.formatTime(Instant.now()));
     ClientEntity entity = clientMapper.convert(client);
     return clientMapper.convert(clientRepository.save(entity));
   }
@@ -52,6 +53,6 @@ public class ClientServiceImpl implements ClientService {
 
   private boolean checkClientData(String email, String phoneNumber) {
     return email.toLowerCase().matches("[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,3}") &&
-        !phoneNumber.matches("^((\\(\\d{3}\\))|\\d{3})[- .]?\\d{3}[- .]?\\d{4}$");
+        phoneNumber.matches("^((\\(\\d{3}\\))|\\d{3})[- .]?\\d{3}[- .]?\\d{4}$");
   }
 }
