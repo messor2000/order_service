@@ -38,7 +38,7 @@ If you wish to use the docker file for the building, please follow the following
 
 1. Make sure you have already installed Docker in your machine. If it is not, please refere this [link](https://docs.docker.com/engine/install/)
 2. Use a terminal inside the project where the Dockerfile is located. Execute the following command to build the image. Replace ```<your tag>``` by the tag of your own. ```docker build -t <your tag>```
-3. Run the image as a container. ```docker run -d -p 8080:8080 <yout tag>```
+3. Run the image as a container. ```docker run -d -p 8080:8080 <yout tag> .```
 4. Past this ```http://localhost:8080/<endpoint from controller>``` into the Postman and use API
 
 Please submit any issue that you faced when developing your spring-boot application.
