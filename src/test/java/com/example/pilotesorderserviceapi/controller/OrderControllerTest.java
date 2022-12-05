@@ -50,17 +50,19 @@ public class OrderControllerTest {
   @BeforeEach
   void setUp() {
     String clientEmail = "test@gmail.com";
+    String clientName = "test@gmail.com";
     order = Order.builder()
         .id(UUID.randomUUID())
         .orderNumber(1)
         .pilotesAmount(5)
         .clientEmail(clientEmail)
+        .clientName(clientName)
         .build();
     client = Client.builder()
         .id(UUID.randomUUID())
-        .firstName("name")
+        .firstName(clientName)
         .lastName("lastName")
-        .email("test@gmail.com")
+        .email(clientEmail)
         .phoneNumber("(202) 555-0125")
         .deliveryAddress("testAddress")
         .build();
@@ -90,10 +92,10 @@ public class OrderControllerTest {
   @Test
   @DisplayName("test get method findClientOrder")
   public void givenClientEmail_whenGetClientOrder_thenReturnStatusOK() throws Exception {
-    when(orderService.getOrdersByClientData(client.getEmail())).thenReturn(List.of(order));
-    mockMvc.perform(get("/orders/{email}", client.getEmail()))
+    when(orderService.getOrdersByClientEmail(client.getEmail())).thenReturn(List.of(order));
+    mockMvc.perform(get("/orders/email/{email}", client.getEmail()))
         .andExpect(status().isOk());
-    verify(orderService, times(1)).getOrdersByClientData(client.getEmail());
+    verify(orderService, times(1)).getOrdersByClientEmail(client.getEmail());
   }
 
   @Test
@@ -130,6 +132,16 @@ public class OrderControllerTest {
   public void givenOrderId_whenDeleteOrder_thenReturnStatusOK() throws Exception {
     mockMvc.perform(delete("/order/{id}", order.getId()))
         .andExpect(status().isOk());
+  }
+
+  @Test
+  @DisplayName("test get method getOrders")
+  public void whenGetOrdersByClient_thenReturnStatusOK() throws Exception {
+    String clientName = "Name";
+    when(orderService.getOrders()).thenReturn(List.of(order));
+    mockMvc.perform(get("/orders/client/{clientName}",  clientName))
+        .andExpect(status().isOk());
+    verify(orderService, times(1)).getOrdersByClientName(clientName);
   }
 
   private String asJsonString(final Object obj) {

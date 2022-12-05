@@ -10,5 +10,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface OrderRepository extends JpaRepository<OrderEntity, UUID> {
   Optional<OrderEntity> findByOrderNumber(Integer orderNumber);
-  List<OrderEntity> findByClientEmailContaining(String clientEmail);
+  List<OrderEntity> findByClientEmail(String clientEmail);
+  List<OrderEntity> findByClientNameContains(String clientEmail);
 }

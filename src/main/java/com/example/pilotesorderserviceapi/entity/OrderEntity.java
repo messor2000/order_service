@@ -28,4 +28,5 @@ public class OrderEntity {
   private BigDecimal price;
   private String createdAt;
   private String clientEmail;
+  private String clientName;
 }

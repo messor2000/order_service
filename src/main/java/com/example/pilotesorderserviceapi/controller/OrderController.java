@@ -47,10 +47,10 @@ public class OrderController {
   }
 
   @ApiOperation(value = "Find order by client email")
-  @GetMapping(path = "/orders/{email}",
+  @GetMapping(path = "/orders/email/{email}",
       produces = {MediaType.APPLICATION_JSON_VALUE })
   public ResponseEntity<List<Order>> getClientOrder(@PathVariable String email) {
-    List<Order> orders = orderService.getOrdersByClientData(email);
+    List<Order> orders = orderService.getOrdersByClientEmail(email);
     return ResponseEntity.ok(orders);
   }
 
@@ -83,5 +83,12 @@ public class OrderController {
   public ResponseEntity<Order> getOrderByOrderNumber(@PathVariable Integer number) {
     Order order = orderService.getOrderByOrderNumber(number);
     return ResponseEntity.ok(order);
+  }
+
+  @ApiOperation(value = "Find orders by client name")
+  @GetMapping(path = "/orders/client/{name}")
+  public ResponseEntity<List<Order>> getOrdersByClientName(@PathVariable String name) {
+    List<Order> orders = orderService.getOrdersByClientName(name);
+    return ResponseEntity.ok(orders);
   }
 }

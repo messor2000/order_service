@@ -13,7 +13,6 @@ import com.example.pilotesorderserviceapi.dto.Client;
 import com.example.pilotesorderserviceapi.dto.Order;
 import com.example.pilotesorderserviceapi.entity.OrderEntity;
 import com.example.pilotesorderserviceapi.exception.UpdateErrorException;
-import com.example.pilotesorderserviceapi.repo.ClientRepository;
 import com.example.pilotesorderserviceapi.repo.OrderNumberRepository;
 import com.example.pilotesorderserviceapi.repo.OrderRepository;
 import com.example.pilotesorderserviceapi.service.order.OrderServiceImpl;
@@ -52,7 +51,7 @@ public class OrderServiceTest {
 
   @BeforeEach
   public void setup(){
-    client = new Client("name", "lastname", "test@gmail.com", "12345",
+    client = new Client("first name", "lastname", "test@gmail.com", "12345",
         "testAddress", timeFormatter.formatTime(Instant.now()));
     order = Order.builder()
         .orderNumber(1)
@@ -61,6 +60,7 @@ public class OrderServiceTest {
         .createdAt(timeFormatter.formatTime(Instant.now()))
         .price(new BigDecimal("6.65"))
         .clientEmail(client.getEmail())
+        .clientName(client.getFirstName())
         .build();
   }
 
@@ -107,9 +107,9 @@ public class OrderServiceTest {
   public void givenClientEmail_whenGetOrderByClientData_thenReturnListOrderObject(){
     OrderEntity orderEntity = orderMapper.convert(order);
 
-    given(orderRepository.findByClientEmailContaining(client.getEmail())).willReturn(List.of(orderEntity));
+    given(orderRepository.findByClientEmail(client.getEmail())).willReturn(List.of(orderEntity));
 
-    List<Order> orderList = orderService.getOrdersByClientData(client.getEmail());
+    List<Order> orderList = orderService.getOrdersByClientEmail(client.getEmail());
 
     assertThat(orderList).isNotNull();
     assertThat(orderList.size()).isEqualTo(1);
@@ -119,9 +119,9 @@ public class OrderServiceTest {
   @Test
   public void givenClientEmail_whenGetOrderByClientData_thenThrowsException(){
     String invalidData = "invalid data";
-    assertThrows(InputMismatchException.class, () -> orderService.getOrdersByClientData(invalidData));
+    assertThrows(InputMismatchException.class, () -> orderService.getOrdersByClientEmail(invalidData));
 
-    verify(orderRepository, never()).findByClientEmailContaining(invalidData);
+    verify(orderRepository, never()).findByClientEmail(invalidData);
   }
 
   @DisplayName("test for updateOrderDetails method")
@@ -178,6 +178,29 @@ public class OrderServiceTest {
     given(orderRepository.findAll()).willReturn(List.of(orderEntity, orderEntity1));
 
     List<Order> orderList = orderService.getOrders();
+
+    assertThat(orderList).isNotNull();
+    assertThat(orderList.size()).isEqualTo(2);
+  }
+
+  @DisplayName("test for getOrdersByClient method")
+  @Test
+  public void givenOrderList_whenGetOrdersByClientName_thenReturnOrdersList(){
+    String clientName = "name";
+    Order order1 = Order.builder()
+        .id(UUID.randomUUID())
+        .orderNumber(1)
+        .pilotesAmount(5)
+        .createdAt(timeFormatter.formatTime(Instant.now()))
+        .clientName("first")
+        .build();
+
+    OrderEntity orderEntity = orderMapper.convert(order);
+    OrderEntity orderEntity1 = orderMapper.convert(order1);
+
+    given(orderRepository.findByClientNameContains(clientName)).willReturn(List.of(orderEntity, orderEntity1));
+
+    List<Order> orderList = orderService.getOrdersByClientName(clientName);
 
     assertThat(orderList).isNotNull();
     assertThat(orderList.size()).isEqualTo(2);

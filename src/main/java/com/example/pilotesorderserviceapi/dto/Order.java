@@ -19,4 +19,5 @@ public class Order {
   private BigDecimal price;
   private String clientEmail;
   private String createdAt;
+  private String clientName;
 }

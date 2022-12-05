@@ -2,29 +2,21 @@ package com.example.pilotesorderserviceapi.service.order;
 
 import static com.example.pilotesorderserviceapi.exception.NotFoundException.orderNotFoundByOrderId;
 import static com.example.pilotesorderserviceapi.exception.NotFoundException.orderNotFoundByOrderNumber;
-import static com.example.pilotesorderserviceapi.exception.NotFoundException.orderNumberNotFound;
 
 import com.example.pilotesorderserviceapi.dto.Client;
 import com.example.pilotesorderserviceapi.dto.Order;
 import com.example.pilotesorderserviceapi.entity.OrderEntity;
 import com.example.pilotesorderserviceapi.entity.OrderNumberEntity;
-import com.example.pilotesorderserviceapi.exception.NotFoundException;
 import com.example.pilotesorderserviceapi.exception.UpdateErrorException;
 import com.example.pilotesorderserviceapi.repo.OrderNumberRepository;
 import com.example.pilotesorderserviceapi.repo.OrderRepository;
 import com.example.pilotesorderserviceapi.util.OrderMapper;
 import com.example.pilotesorderserviceapi.util.TimeFormatter;
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 import java.util.Collections;
 import java.util.InputMismatchException;
 import java.util.List;
-import java.util.Locale;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
@@ -62,6 +54,7 @@ public class OrderServiceImpl implements OrderService {
     orderEntity.setDeliveryAddress(client.getDeliveryAddress());
     orderEntity.setPrice(BigDecimal.valueOf(1.33 * pilotesAmount));
     orderEntity.setClientEmail(client.getEmail());
+    orderEntity.setClientName(client.getFirstName());
 
     orderEntity.setOrderNumber(getOrderNumber());
 
@@ -70,12 +63,12 @@ public class OrderServiceImpl implements OrderService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<Order> getOrdersByClientData(String clientData) {
+  public List<Order> getOrdersByClientEmail(String clientData) {
     if (!checkInputData(clientData)) {
       throw new InputMismatchException("You can find any orders using this email: " + clientData);
     }
 
-    List<Order> orders = orderRepository.findByClientEmailContaining(clientData).stream()
+    List<Order> orders = orderRepository.findByClientEmail(clientData).stream()
         .map(orderMapper::convert).collect(Collectors.toList());
 
     if (orders.isEmpty()) {
@@ -125,6 +118,12 @@ public class OrderServiceImpl implements OrderService {
   public Order getOrderByOrderNumber(Integer orderNumber) {
     return orderRepository.findByOrderNumber(orderNumber).map(orderMapper::convert)
         .orElseThrow(() -> orderNotFoundByOrderNumber(String.valueOf(orderNumber)));
+  }
+
+  @Override
+  public List<Order> getOrdersByClientName(String clientName) {
+    return orderRepository.findByClientNameContains(clientName).stream()
+        .map(orderMapper::convert).collect(Collectors.toList());
   }
 
   @Transactional
