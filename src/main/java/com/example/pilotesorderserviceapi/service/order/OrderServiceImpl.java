@@ -93,7 +93,7 @@ public class OrderServiceImpl implements OrderService {
     foundOrder.setDeliveryAddress(order.getDeliveryAddress());
     foundOrder.setCreatedAt(timeFormatter.formatTime(Instant.now()));
     if (!foundOrder.getPilotesAmount().equals(order.getPilotesAmount())) {
-      if (checkPilotesAmount(order.getPilotesAmount())) {
+      if (!checkPilotesAmount(order.getPilotesAmount())) {
         throw new InputMismatchException("You can order only 5, 10, or 15 pilotes, not: " + order.getPilotesAmount());
       }
       foundOrder.setPilotesAmount(order.getPilotesAmount());

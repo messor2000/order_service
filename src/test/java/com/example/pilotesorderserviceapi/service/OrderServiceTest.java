@@ -52,10 +52,14 @@ public class OrderServiceTest {
 
   @BeforeEach
   public void setup(){
-    client = new Client("first name", "lastname", "test@gmail.com", "12345",
-        "testAddress", timeFormatter.formatTime(Instant.now()));
+    client = Client.builder()
+        .firstName("first name")
+        .lastName("lastName")
+        .email("test@gmail.com")
+        .phoneNumber("(202) 555-0125")
+        .deliveryAddress("testAddress")
+        .build();
     order = Order.builder()
-//        .id(uuid)
         .orderNumber(1)
         .deliveryAddress(client.getDeliveryAddress())
         .pilotesAmount(5)

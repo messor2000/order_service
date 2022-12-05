@@ -15,7 +15,6 @@ import com.example.pilotesorderserviceapi.dto.Client;
 import com.example.pilotesorderserviceapi.exception.ObjectToJsonStringException;
 import com.example.pilotesorderserviceapi.service.client.ClientServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.time.Instant;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
