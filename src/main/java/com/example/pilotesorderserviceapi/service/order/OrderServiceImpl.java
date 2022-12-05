@@ -49,6 +49,9 @@ public class OrderServiceImpl implements OrderService {
     }
 
     OrderEntity orderEntity = new OrderEntity();
+    if (!checkInputData(client.getEmail())) {
+      throw new InputMismatchException("You can find any orders using this email: " + client.getEmail());
+    }
     orderEntity.setCreatedAt(timeFormatter.formatTime(Instant.now()));
     orderEntity.setPilotesAmount(pilotesAmount);
     orderEntity.setDeliveryAddress(client.getDeliveryAddress());
@@ -96,10 +99,8 @@ public class OrderServiceImpl implements OrderService {
       foundOrder.setPilotesAmount(order.getPilotesAmount());
       foundOrder.setPrice(BigDecimal.valueOf(1.33 * order.getPilotesAmount()));
     }
-    OrderEntity orderEntity = orderRepository.save(foundOrder);
 
-    return orderMapper.convert(orderEntity);
-//    return orderMapper.convert(orderRepository.save(foundOrder));
+    return orderMapper.convert(orderRepository.save(foundOrder));
   }
 
   @Override
@@ -146,7 +147,6 @@ public class OrderServiceImpl implements OrderService {
 
   private boolean checkPilotesAmount(Integer pilotesAmount) {
     return pilotesAmount.toString().matches("[5, 10, 15]");
-//    return pilotesAmount.equals(5) || pilotesAmount.equals(10) || pilotesAmount.equals(15);
   }
 
   private boolean checkInputData(String clientEmail) {
