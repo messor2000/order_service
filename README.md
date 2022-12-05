@@ -15,4 +15,11 @@ Next run the command,
 
 ```mvn spring-boot:run```
 
-and the server will start automatically. Try to visit this [Ссылка со сноской][url] to see the api documentation.
+and the server will start automatically. 
+Try to put this  ```http://localhost:8080/v2/api-docs``` link to the poster to see the api documentation.
+
+>NOTE
+> 
+>This project used in-memory H2 database. 
+> 
+>So the database will be overridden each time when you rerun your project 

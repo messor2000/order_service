@@ -13,6 +13,7 @@ import com.example.pilotesorderserviceapi.dto.Client;
 import com.example.pilotesorderserviceapi.dto.Order;
 import com.example.pilotesorderserviceapi.entity.OrderEntity;
 import com.example.pilotesorderserviceapi.exception.UpdateErrorException;
+import com.example.pilotesorderserviceapi.repo.ClientRepository;
 import com.example.pilotesorderserviceapi.repo.OrderNumberRepository;
 import com.example.pilotesorderserviceapi.repo.OrderRepository;
 import com.example.pilotesorderserviceapi.service.order.OrderServiceImpl;
@@ -51,6 +52,8 @@ public class OrderServiceTest {
 
   @BeforeEach
   public void setup(){
+    client = new Client("name", "lastname", "test@gmail.com", "12345",
+        "testAddress", timeFormatter.formatTime(Instant.now()));
     order = Order.builder()
         .orderNumber(1)
         .deliveryAddress(client.getDeliveryAddress())
@@ -58,14 +61,6 @@ public class OrderServiceTest {
         .createdAt(timeFormatter.formatTime(Instant.now()))
         .price(new BigDecimal("6.65"))
         .clientEmail(client.getEmail())
-        .build();
-    client = Client.builder()
-        .firstName("name")
-        .lastName("lastName")
-        .email("test@gmail.com")
-        .phoneNumber("(202) 555-0125")
-        .deliveryAddress("testAddress")
-        .createdAt(timeFormatter.formatTime(Instant.now()))
         .build();
   }
 
@@ -132,7 +127,6 @@ public class OrderServiceTest {
   @DisplayName("test for updateOrderDetails method")
   @Test
   public void givenOrderNumberAndOrderObject_whenUpdateOrder_thenReturnUpdatedOrder(){
-    orderRepository.save(orderMapper.convert(order));
     OrderEntity orderEntity = orderMapper.convert(order);
 
     given(orderRepository.save(orderEntity)).willReturn(orderEntity);

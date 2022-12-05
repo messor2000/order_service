@@ -93,6 +93,7 @@ public class OrderServiceImpl implements OrderService {
       throw new UpdateErrorException("You cannot modify order after 5 minutes of it creation");
     }
 
+    foundOrder.setId(UUID.randomUUID());
     foundOrder.setDeliveryAddress(order.getDeliveryAddress());
     foundOrder.setCreatedAt(timeFormatter.formatTime(Instant.now()));
     if (!foundOrder.getPilotesAmount().equals(order.getPilotesAmount())) {
@@ -156,6 +157,6 @@ public class OrderServiceImpl implements OrderService {
     String now = timeFormatter.formatTime(Instant.now());
     int nowMinutes = Integer.parseInt(StringUtils.right(now, 2));
 
-    return nowMinutes <= orderMinutes;
+    return nowMinutes < orderMinutes;
   }
 }

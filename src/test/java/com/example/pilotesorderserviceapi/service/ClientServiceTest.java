@@ -41,7 +41,7 @@ public class ClientServiceTest {
   private Client client;
 
   @BeforeEach
-  public void setup(){
+  public void setup() {
     client = Client.builder()
         .firstName("name")
         .lastName("lastName")
@@ -54,7 +54,7 @@ public class ClientServiceTest {
 
   @DisplayName("test for createClient method")
   @Test
-  public void givenClientObject_whenSaveClient_thenReturnClientObject(){
+  public void givenClientObject_whenSaveClient_thenReturnClientObject() {
     given(clientRepository.findByEmail(client.getEmail()))
         .willReturn(Optional.empty());
 
@@ -69,12 +69,12 @@ public class ClientServiceTest {
 
   @DisplayName("test for createClient method which throw validation error")
   @Test
-  public void givenClientObject_whenSaveClient_thenThrowsException(){
+  public void givenClientObject_whenSaveClient_thenThrowsException() {
     client = Client.builder()
         .firstName("name")
         .lastName("lastName")
         .email("test@gmail.com")
-        .phoneNumber("(202) 555-0125")
+        .phoneNumber("invalid number")
         .deliveryAddress("testAddress")
         .createdAt(timeFormatter.formatTime(Instant.now()))
         .build();
@@ -89,7 +89,7 @@ public class ClientServiceTest {
 
   @DisplayName("test for createClient method which throws exception")
   @Test
-  public void givenExistingEmail_whenSaveClient_thenThrowsException(){
+  public void givenExistingEmail_whenSaveClient_thenThrowsException() {
     ClientEntity clientEntity = clientMapper.convert(client);
 
     given(clientRepository.findByEmail(client.getEmail()))
@@ -102,7 +102,7 @@ public class ClientServiceTest {
 
   @DisplayName("test for getClientById method")
   @Test
-  public void givenEmployeeId_whenGetEmployeeById_thenReturnEmployeeObject(){
+  public void givenEmployeeId_whenGetEmployeeById_thenReturnEmployeeObject() {
     ClientEntity clientEntity = clientMapper.convert(client);
 
     given(clientRepository.findById(client.getId())).willReturn(Optional.of(clientEntity));
@@ -114,7 +114,7 @@ public class ClientServiceTest {
 
   @DisplayName("test for deleteClient method")
   @Test
-  public void givenClientId_whenDeleteClient_thenNothing(){
+  public void givenClientId_whenDeleteClient_thenNothing() {
     willDoNothing().given(clientRepository).deleteById(client.getId());
 
     clientService.deleteClient(client.getId());

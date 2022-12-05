@@ -18,4 +18,14 @@ public class Client {
   private String phoneNumber;
   private String deliveryAddress;
   private String createdAt;
+
+  public Client(String firstName, String lastName, String email, String phoneNumber, String deliveryAddress,
+                String createdAt) {
+    this.firstName = firstName;
+    this.lastName = lastName;
+    this.email = email;
+    this.phoneNumber = phoneNumber;
+    this.deliveryAddress = deliveryAddress;
+    this.createdAt = createdAt;
+  }
 }
