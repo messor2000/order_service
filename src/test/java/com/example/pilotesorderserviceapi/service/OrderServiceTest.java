@@ -48,12 +48,14 @@ public class OrderServiceTest {
 
   private Client client;
   private Order order;
+  private final UUID uuid = UUID.randomUUID();
 
   @BeforeEach
   public void setup(){
     client = new Client("first name", "lastname", "test@gmail.com", "12345",
         "testAddress", timeFormatter.formatTime(Instant.now()));
     order = Order.builder()
+//        .id(uuid)
         .orderNumber(1)
         .deliveryAddress(client.getDeliveryAddress())
         .pilotesAmount(5)
@@ -127,14 +129,17 @@ public class OrderServiceTest {
   @DisplayName("test for updateOrderDetails method")
   @Test
   public void givenOrderNumberAndOrderObject_whenUpdateOrder_thenReturnUpdatedOrder(){
-    OrderEntity orderEntity = orderMapper.convert(order);
-
-    given(orderRepository.save(orderEntity)).willReturn(orderEntity);
+    order.setId(uuid);
     order.setPilotesAmount(10);
     order.setCreatedAt(timeFormatter.formatTime(Instant.now()));
+    OrderEntity orderEntity = orderMapper.convert(order);
+
+    given(orderRepository.findByOrderNumber(1)).willReturn(Optional.of(orderEntity));
+    given(orderRepository.save(orderEntity)).willReturn(orderEntity);
+
     Order updatedOrder = orderService.updateOrderDetails(1, order);
 
-    assertThat(updatedOrder.getOrderNumber()).isEqualTo(10);
+    assertThat(updatedOrder.getPilotesAmount()).isEqualTo(10);
   }
 
   @DisplayName("test for updateOrderDetails method after 5 min throws an exception")
@@ -146,6 +151,9 @@ public class OrderServiceTest {
         .pilotesAmount(5)
         .createdAt(timeFormatter.formatTime(Instant.now().minusSeconds(500)))
         .build();
+    OrderEntity orderEntity = orderMapper.convert(order);
+
+    given(orderRepository.findByOrderNumber(1)).willReturn(Optional.of(orderEntity));
 
     assertThrows(UpdateErrorException.class, () -> orderService.updateOrderDetails(order.getOrderNumber(), order));
 

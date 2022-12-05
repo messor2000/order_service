@@ -82,11 +82,11 @@ public class OrderServiceImpl implements OrderService {
   @Transactional
   public Order updateOrderDetails(Integer orderNumber, Order order) {
     OrderEntity foundOrder = orderMapper.convert(getOrderByOrderNumber(orderNumber));
-    if (checkOrderTime(foundOrder)) {
+    if (!checkOrderTime(foundOrder)) {
       throw new UpdateErrorException("You cannot modify order after 5 minutes of it creation");
     }
 
-    foundOrder.setId(UUID.randomUUID());
+    foundOrder.setId(order.getId());
     foundOrder.setDeliveryAddress(order.getDeliveryAddress());
     foundOrder.setCreatedAt(timeFormatter.formatTime(Instant.now()));
     if (!foundOrder.getPilotesAmount().equals(order.getPilotesAmount())) {
@@ -94,10 +94,12 @@ public class OrderServiceImpl implements OrderService {
         throw new InputMismatchException("You can order only 5, 10, or 15 pilotes, not: " + order.getPilotesAmount());
       }
       foundOrder.setPilotesAmount(order.getPilotesAmount());
-      foundOrder.setPrice(BigDecimal.valueOf(1.33 * order.getOrderNumber()));
+      foundOrder.setPrice(BigDecimal.valueOf(1.33 * order.getPilotesAmount()));
     }
+    OrderEntity orderEntity = orderRepository.save(foundOrder);
 
-    return orderMapper.convert(orderRepository.save(foundOrder));
+    return orderMapper.convert(orderEntity);
+//    return orderMapper.convert(orderRepository.save(foundOrder));
   }
 
   @Override
@@ -143,7 +145,8 @@ public class OrderServiceImpl implements OrderService {
   }
 
   private boolean checkPilotesAmount(Integer pilotesAmount) {
-    return pilotesAmount.equals(5) || pilotesAmount.equals(10) || pilotesAmount.equals(15);
+    return pilotesAmount.toString().matches("[5, 10, 15]");
+//    return pilotesAmount.equals(5) || pilotesAmount.equals(10) || pilotesAmount.equals(15);
   }
 
   private boolean checkInputData(String clientEmail) {
@@ -156,6 +159,6 @@ public class OrderServiceImpl implements OrderService {
     String now = timeFormatter.formatTime(Instant.now());
     int nowMinutes = Integer.parseInt(StringUtils.right(now, 2));
 
-    return nowMinutes < orderMinutes;
+    return (nowMinutes - orderMinutes) < 5;
   }
 }
