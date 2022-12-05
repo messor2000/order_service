@@ -72,7 +72,7 @@ public class OrderControllerTest {
   @DisplayName("test get method getOrder")
   public void givenOrderId_whenGetOrder_thenReturnStatusOK() throws Exception {
     when(orderService.getOrderById(order.getId())).thenReturn(order);
-    mockMvc.perform(get("/order/{id}", order.getId()))
+    mockMvc.perform(get("/orders/{id}", order.getId()))
         .andExpect(status().isOk())
         .andExpect(content().json(asJsonString(order)));
   }
@@ -81,7 +81,7 @@ public class OrderControllerTest {
   @DisplayName("test post method createOrder")
   public void givenAnAmountOfOrderAndClientObject_whenCreateOrder_thenReturnStatusOK() throws Exception {
     when(orderService.createOrder(eq(5), any(Client.class))).thenAnswer(c -> new Order());
-    mockMvc.perform(post("/order")
+    mockMvc.perform(post("/orders")
             .contentType(MediaType.APPLICATION_JSON)
             .param("pilotesAmount", "5")
             .content(asJsonString(order)))
@@ -111,7 +111,7 @@ public class OrderControllerTest {
   @DisplayName("test get method findOrderByOrderNumber")
   public void givenOrderNumber_whenGetOrderByNumber_thenReturnStatusOK() throws Exception {
     when(orderService.getOrderByOrderNumber(order.getOrderNumber())).thenReturn(order);
-    mockMvc.perform(get("/order/number/{number}", order.getOrderNumber().toString()))
+    mockMvc.perform(get("/orders/number/{number}", order.getOrderNumber().toString()))
         .andExpect(status().isOk());
     verify(orderService, times(1)).getOrderByOrderNumber(order.getOrderNumber());
   }
@@ -120,7 +120,7 @@ public class OrderControllerTest {
   @DisplayName("test post method createOrder")
   public void givenNumberOrderAndClientObject_whenEditOrder_thenReturnStatusOK() throws Exception {
     when(orderService.updateOrderDetails(order.getOrderNumber(), order)).thenAnswer(c -> new Order());
-    mockMvc.perform(put("/order/{orderNumber}/edit", order.getOrderNumber())
+    mockMvc.perform(put("/orders/{orderNumber}/edit", order.getOrderNumber())
             .contentType(MediaType.APPLICATION_JSON)
             .content(asJsonString(order)))
         .andExpect(status().isOk());
@@ -130,7 +130,7 @@ public class OrderControllerTest {
   @Test
   @DisplayName("test delete method deleteOrder")
   public void givenOrderId_whenDeleteOrder_thenReturnStatusOK() throws Exception {
-    mockMvc.perform(delete("/order/{id}", order.getId()))
+    mockMvc.perform(delete("/orders/{id}", order.getId()))
         .andExpect(status().isOk());
   }
 

@@ -29,7 +29,7 @@ public class OrderController {
   OrderService orderService;
 
   @ApiOperation(value = "Get Order by ID")
-  @GetMapping(path = "/order/{id}",
+  @GetMapping(path = "/orders/{id}",
       produces = {MediaType.APPLICATION_JSON_VALUE })
   public ResponseEntity<Order> getOrder(@PathVariable UUID id) {
     Order order = orderService.getOrderById(id);
@@ -37,7 +37,7 @@ public class OrderController {
   }
 
   @ApiOperation(value = "Create new order")
-  @PostMapping(path = "/order",
+  @PostMapping(path = "/orders",
       consumes = {MediaType.APPLICATION_JSON_VALUE },
       produces = {MediaType.APPLICATION_JSON_VALUE })
   public ResponseEntity<Order> createOrder(@RequestParam(value = "pilotesAmount") Integer pilotesAmount,
@@ -55,7 +55,7 @@ public class OrderController {
   }
 
   @ApiOperation(value = "Edit order")
-  @PutMapping(path = "/order/{orderNumber}/edit",
+  @PutMapping(path = "/orders/{orderNumber}/edit",
       consumes = {MediaType.APPLICATION_JSON_VALUE },
       produces = {MediaType.APPLICATION_JSON_VALUE })
   public ResponseEntity<Order> editOrder(@PathVariable Integer orderNumber, @RequestBody Order order) {
@@ -64,7 +64,7 @@ public class OrderController {
   }
 
   @ApiOperation(value = "Delete order")
-  @DeleteMapping(path = "/order/{id}")
+  @DeleteMapping(path = "/orders/{id}")
   public void deleteOrder(@PathVariable UUID id) {
     orderService.deleteOrder(id);
   }
@@ -78,7 +78,7 @@ public class OrderController {
   }
 
   @ApiOperation(value = "Get Order by order number")
-  @GetMapping(path = "/order/number/{number}",
+  @GetMapping(path = "/orders/number/{number}",
       produces = {MediaType.APPLICATION_JSON_VALUE })
   public ResponseEntity<Order> getOrderByOrderNumber(@PathVariable Integer number) {
     Order order = orderService.getOrderByOrderNumber(number);

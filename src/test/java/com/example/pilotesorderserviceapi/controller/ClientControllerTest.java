@@ -58,7 +58,7 @@ public class ClientControllerTest {
   @DisplayName("test post method createClient")
   public void givenClientObject_whenCreateClient_thenReturnStatusOK() throws Exception {
     when(clientService.createClient(any(Client.class))).thenAnswer(c -> new Client());
-    mockMvc.perform(post("/client")
+    mockMvc.perform(post("/clients")
             .contentType(MediaType.APPLICATION_JSON)
             .content(asJsonString(client)))
         .andExpect(status().isOk());
@@ -69,7 +69,7 @@ public class ClientControllerTest {
   @DisplayName("test get method getClient")
   public void givenClientId_whenGetClient_thenReturnStatusOK() throws Exception {
     when(clientService.getClientById(client.getId())).thenReturn(client);
-    mockMvc.perform(get("/client/{id}", client.getId()))
+    mockMvc.perform(get("/clients/{id}", client.getId()))
         .andExpect(status().isOk())
         .andExpect(content().json(asJsonString(client)));
   }
@@ -77,7 +77,7 @@ public class ClientControllerTest {
   @Test
   @DisplayName("test delete method deleteClient")
   public void givenClientId_whenDeleteClient_thenReturnStatusOK() throws Exception {
-    mockMvc.perform(delete("/client/{id}", client.getId()))
+    mockMvc.perform(delete("/clients/{id}", client.getId()))
         .andExpect(status().isOk());
   }
 

@@ -25,7 +25,7 @@ public class ClientController {
   ClientService clientService;
 
   @ApiOperation(value = "Get Client by ID")
-  @GetMapping(path = "/client/{id}",
+  @GetMapping(path = "/clients/{id}",
       produces = {MediaType.APPLICATION_JSON_VALUE })
   public ResponseEntity<Client> getClient(@PathVariable UUID id) {
     Client client = clientService.getClientById(id);
@@ -33,7 +33,7 @@ public class ClientController {
   }
 
   @ApiOperation(value = "Create new client")
-  @PostMapping(path = "/client",
+  @PostMapping(path = "/clients",
       consumes = {MediaType.APPLICATION_JSON_VALUE },
       produces = {MediaType.APPLICATION_JSON_VALUE })
   public ResponseEntity<Client> createClient(@RequestBody Client client) {
@@ -41,7 +41,7 @@ public class ClientController {
     return ResponseEntity.ok(newClient);
   }
 
-  @DeleteMapping(path = "/client/{id}")
+  @DeleteMapping(path = "/clients/{id}")
   @ApiOperation(value = "Delete client by ID")
   public void deleteClient(@PathVariable UUID id) {
     clientService.deleteClient(id);
